@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recharge Entry System</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<style>
+  /* Add to your style.css */
+.overdue-icon {
+  background-color: #f39c12;
+}
+
+.critical-icon {
+  background-color: #e74c3c;
+}
+
+.overdue-badge {
+  background-color: #e74c3c;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+.status-badge.unpaid {
+  display: flex;
+  align-items: center;
+}
+.filter-container {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.filter-group:hover {
+  background: #e9ecef;
+}
+
+.filter-group label {
+  font-size: 14px;
+  color: #495057;
+  white-space: nowrap;
+}
+
+.filter-select {
+  padding: 8px 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  background-color: white;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.filter-select:focus {
+  border-color: #0984e3;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+}
+
+#monthFilter {
+  min-width: 150px;
+}
+
+@media (max-width: 768px) {
+  .filter-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+}
+.filter-container {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: nowrap; /* Prevent wrapping to new line */
+  overflow-x: auto; /* Allow horizontal scrolling if needed */
+  padding-bottom: 10px; /* Space for scrollbar */
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  white-space: nowrap; /* Prevent text wrapping */
+  flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Remark field styling */
+.remark-field {
+  grid-column: 1 / -1;
+}
+
+.remark-field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+/* Keep the rest of your existing filter CSS */
+</style>
+<body>
+  <div class="particles-container">
+    <div id="particles-js"></div>
+  </div>
+  
+  <div class="container animate__animated animate__fadeIn">
+    <div class="header-section">
+      <h1 class="welcome-title">Welcome, <span class="username">{{ user }}</span>!</h1>
+      <div class="user-actions">
+        {% if session['role'] == 'admin' %}
+          <a href="/register" class="action-btn btn-register"><i class="fas fa-user-plus"></i> Register User</a>
+          <a href="/users" class="action-btn btn-manage"><i class="fas fa-users-cog"></i> Manage Users</a>
+        {% endif %}
+        <a href="/logout" class="action-btn btn-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      </div>
+    </div>
+
+    {% if role == 'admin' %}
+    <div id="summaryBox" class="summary-box animate__animated animate__fadeInUp">
+      <div class="summary-header">
+        <i class="fas fa-chart-pie"></i>
+        <h3>Admin Dashboard</h3>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-icon total-icon">
+            <i class="fas fa-list-alt"></i>
+          </div>
+          <div class="summary-content">
+            <p>Total Recharges</p>
+            <h4 id="totalRecharges">...</h4>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon amount-icon">
+            <i class="fas fa-rupee-sign"></i>
+          </div>
+          <div class="summary-content">
+            <p>Total Amount</p>
+            <h4>₹<span id="totalAmount">...</span></h4>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon paid-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="summary-content">
+            <p>Paid</p>
+            <h4 id="paidCount">...</h4>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon unpaid-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="summary-content">
+            <p>Unpaid</p>
+            <h4 id="unpaidCount">...</h4>
+          </div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-icon month-icon">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="summary-content">
+            <p>This Month</p>
+            <h4 id="monthCount">...</h4>
+          </div>
+        </div>
+          <div class="summary-card">
+    <div class="summary-icon overdue-icon">
+      <i class="fas fa-exclamation-triangle"></i>
+    </div>
+    <div class="summary-content">
+      <p>Overdue > 2 days</p>
+      <h4 id="overdue2Days">...</h4>
+    </div>
+  </div>
+  
+  <div class="summary-card">
+    <div class="summary-icon overdue-icon">
+      <i class="fas fa-exclamation-circle"></i>
+    </div>
+    <div class="summary-content">
+      <p>Overdue > 7 days</p>
+      <h4 id="overdue7Days">...</h4>
+    </div>
+  </div>
+  
+  <div class="summary-card">
+    <div class="summary-icon critical-icon">
+      <i class="fas fa-skull-crossbones"></i>
+    </div>
+    <div class="summary-content">
+      <p>Overdue > 10 days</p>
+      <h4 id="overdue10Days">...</h4>
+    </div>
+  </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if error %}
+      <div class="error-message animate__animated animate__shakeX">
+        <i class="fas fa-exclamation-circle"></i> {{ error }}
+      </div>
+    {% endif %}
+
+    <div class="main-content animate__animated animate__fadeIn">
+      <div class="section-header">
+        <i class="fas fa-tv"></i>
+        <h2>Cable TV & Broadband Recharge System</h2>
+      </div>
+
+      <div class="search-section animate__animated animate__fadeIn">
+        <h3><i class="fas fa-search"></i> Customer Search</h3>
+        <div class="search-container">
+  <div class="search-input-container">
+    <i class="fas fa-search search-icon"></i>
+    <input type="text" id="searchInput" placeholder="Search by Name, STB, VC, Mobile, User ID" class="search-input">
+  </div>
+  <div class="filter-container">
+    <div class="filter-group">
+      <label><i class="fas fa-filter"></i> Status:</label>
+      <select id="statusFilter" class="filter-select">
+        <option value="">All</option>
+        <option value="Paid">Paid</option>
+        <option value="Unpaid">Unpaid</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label><i class="fas fa-calendar"></i> Month:</label>
+      <input type="month" id="monthFilter" class="filter-select">
+    </div>
+    <div class="filter-group">
+      <label><i class="fas fa-clock"></i> Due By:</label>
+      <select id="dueByDaysFilter" class="filter-select">
+        <option value="">All</option>
+        <option value="2">> 2 days</option>
+        <option value="7">> 7 days</option>
+        <option value="10">> 10 days</option>
+      </select>
+    </div>
+  </div>
+</div>
+        
+        <div id="searchResults" class="search-results"></div>
+
+        <a href="/export" class="export-btn">
+          <i class="fas fa-file-excel"></i> Export to Excel
+        </a>
+      </div>
+
+      <div class="form-section animate__animated animate__fadeIn">
+        <h3><i class="fas fa-edit"></i> Recharge Entry Form</h3>
+        <form id="rechargeForm" class="animated-form">
+          <div class="form-grid">
+            <!-- Service Type -->
+            <div class="form-group">
+              <label><i class="fas fa-network-wired"></i> Service Type:</label>
+              <select name="service_type" required class="form-input">
+                <option value="Cable">Cable</option>
+                <option value="Broadband">Broadband</option>
+              </select>
+            </div>
+
+            <!-- Subscriber Name -->
+            <div class="form-group">
+              <label><i class="fas fa-user"></i> Subscriber Name:</label>
+              <input type="text" name="subscriber_name" required class="form-input">
+            </div>
+
+            <!-- Address -->
+            <div class="form-group">
+              <label><i class="fas fa-map-marker-alt"></i> Address:</label>
+              <input type="text" name="address" class="form-input">
+            </div>
+
+            <!-- STB No -->
+            <div class="form-group">
+              <label><i class="fas fa-satellite-dish"></i> STB No:</label>
+              <input type="text" name="stb_no" class="form-input">
+            </div>
+
+            <!-- VC No -->
+            <div class="form-group">
+              <label><i class="fas fa-hashtag"></i> VC No:</label>
+              <input type="text" name="vc_no" class="form-input">
+            </div>
+
+            <!-- Mobile No -->
+            <div class="form-group">
+              <label><i class="fas fa-mobile-alt"></i> Mobile No:</label>
+              <input type="text" name="mobile_no" class="form-input">
+            </div>
+
+            <!-- Recharge Amount -->
+            <div class="form-group amount-input-group">
+              <label><i class="fas fa-money-bill-wave"></i> Recharge Amount:</label>
+              <input type="number" step="0.01" class="form-input" name="recharge_amount" required>
+            </div>
+
+            <!-- Recharge Date -->
+            <div class="form-group date-time-picker">
+              <label><i class="fas fa-calendar-day"></i> Recharge Date:</label>
+              <input type="datetime-local" name="recharge_date" class="form-input" id="recharge_date">
+            </div>
+
+            <!-- Paid Date -->
+            <div class="form-group">
+              <label><i class="fas fa-calendar-check"></i> Paid Date:</label>
+              <input type="date" name="paid_date" class="form-input" id="paid_date">
+            </div>
+
+            <!-- Amount -->
+            <div class="form-group">
+              <label><i class="fas fa-rupee-sign"></i> Amount Paid (₹):</label>
+              <input type="number" name="amount_paid" required class="form-input">
+            </div>
+
+
+            <!-- Remark Field (hidden from search results) -->
+            <div class="form-group remark-field">
+              <label><i class="fas fa-comment-alt"></i> Internal Remark:</label>
+              <textarea name="remark" class="form-input" placeholder="Internal notes (not visible to customers)"></textarea>
+            </div>
+          </div>
+
+          <input type="hidden" name="_id" id="editId">
+
+          <div class="form-actions">
+            <button type="submit" class="btn-submit">
+              <i class="fas fa-save"></i> Save
+            </button>
+            <button type="reset" class="btn-reset">
+              <i class="fas fa-eraser"></i> Clear
+            </button>
+          </div>
+        </form>
+
+        <div id="responseMessage" class="response-message"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+
+  function pad(num) {
+    return num < 10 ? '0' + num : num;
+  }
+    // Particles.js initialization
+    document.addEventListener('DOMContentLoaded', function() {
+      particlesJS('particles-js', {
+        "particles": {
+          "number": {
+            "value": 80,
+            "density": {
+              "enable": true,
+              "value_area": 800
+            }
+          },
+          "color": {
+            "value": "#0984e3"
+          },
+          "shape": {
+            "type": "circle",
+            "stroke": {
+              "width": 0,
+              "color": "#000000"
+            },
+            "polygon": {
+              "nb_sides": 5
+            }
+          },
+          "opacity": {
+            "value": 0.3,
+            "random": false,
+            "anim": {
+              "enable": false,
+              "speed": 1,
+              "opacity_min": 0.1,
+              "sync": false
+            }
+          },
+          "size": {
+            "value": 3,
+            "random": true,
+            "anim": {
+              "enable": false,
+              "speed": 40,
+              "size_min": 0.1,
+              "sync": false
+            }
+          },
+          "line_linked": {
+            "enable": true,
+            "distance": 150,
+            "color": "#0984e3",
+            "opacity": 0.2,
+            "width": 1
+          },
+          "move": {
+            "enable": true,
+            "speed": 2,
+            "direction": "none",
+            "random": false,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false,
+            "attract": {
+              "enable": false,
+              "rotateX": 600,
+              "rotateY": 1200
+            }
+          }
+        },
+        "interactivity": {
+          "detect_on": "canvas",
+          "events": {
+            "onhover": {
+              "enable": true,
+              "mode": "grab"
+            },
+            "onclick": {
+              "enable": true,
+              "mode": "push"
+            },
+            "resize": true
+          },
+          "modes": {
+            "grab": {
+              "distance": 140,
+              "line_linked": {
+                "opacity": 1
+              }
+            },
+            "bubble": {
+              "distance": 400,
+              "size": 40,
+              "duration": 2,
+              "opacity": 8,
+              "speed": 3
+            },
+            "repulse": {
+              "distance": 200,
+              "duration": 0.4
+            },
+            "push": {
+              "particles_nb": 4
+            },
+            "remove": {
+              "particles_nb": 2
+            }
+          }
+        },
+        "retina_detect": true
+      });
+    });
+
+    let editId = null;
+
+    async function deleteUser(id) {
+      if (confirm("Are you sure you want to delete this user?")) {
+        const res = await fetch(`/delete_user/${id}`, { method: 'POST' });
+        const data = await res.json();
+        alert(data.message);
+        location.reload();
+      }
+    }
+
+async function loadSummary() {
+  const res = await fetch('/summary');
+  const data = await res.json();
+
+  if (data && data.total_recharges !== undefined) {
+    document.getElementById('totalRecharges').innerText = data.total_recharges;
+    document.getElementById('totalAmount').innerText = data.total_amount.toFixed(2);
+    document.getElementById('paidCount').innerText = data.paid_recharges;
+    document.getElementById('unpaidCount').innerText = data.unpaid_recharges;
+    document.getElementById('monthCount').innerText = data.this_month;
+    document.getElementById('overdue2Days').innerText = data.overdue_2_days || 0;
+    document.getElementById('overdue7Days').innerText = data.overdue_7_days || 0;
+    document.getElementById('overdue10Days').innerText = data.overdue_10_days || 0;
+  }
+}
+
+// Add event listener for dueByDaysFilter
+document.getElementById('dueByDaysFilter').addEventListener('change', performSearch);
+
+window.onload = () => {
+  loadSummary();
+
+  // Set current date and time in IST for recharge_date field
+  const now = new Date();
+  const ISTOffset = 330; // in minutes
+  const ISTTime = new Date(now.getTime() + (ISTOffset + now.getTimezoneOffset()) * 60000);
+
+
+
+  // For Recharge Date (datetime-local)
+  const yyyy = ISTTime.getFullYear();
+  const mm = pad(ISTTime.getMonth() + 1);
+  const dd = pad(ISTTime.getDate());
+  const hh = pad(ISTTime.getHours());
+  const mi = pad(ISTTime.getMinutes());
+  document.getElementById('recharge_date').value = `${yyyy}-${mm}-${dd}T${hh}:${mi}`;
+
+  // For Paid Date (date only)
+  document.getElementById('paid_date').value = `${yyyy}-${mm}-${dd}`;
+  
+  // Add animation class to form elements
+  const formGroups = document.querySelectorAll('.form-group');
+  formGroups.forEach((group, index) => {
+    group.style.animationDelay = `${index * 0.1}s`;
+    group.classList.add('animate__animated', 'animate__fadeInUp');
+  });
+};
+
+    const form = document.getElementById('rechargeForm');
+    const searchInput = document.getElementById('searchInput');
+
+    document.getElementById('statusFilter').addEventListener('change', () => {
+      searchInput.dispatchEvent(new Event('input'));
+    });
+
+    document.getElementById('monthFilter').addEventListener('change', () => {
+      searchInput.dispatchEvent(new Event('input'));
+    });
+
+searchInput.addEventListener('input', performSearch);
+document.getElementById('statusFilter').addEventListener('change', performSearch);
+document.getElementById('monthFilter').addEventListener('change', performSearch);
+
+async function performSearch() {
+  const query = searchInput.value;
+  const status = document.getElementById('statusFilter').value;
+  const month = document.getElementById('monthFilter').value;
+  const dueByDays = document.getElementById('dueByDaysFilter').value;
+  
+  const params = new URLSearchParams({ query, status, month, dueByDays });
+  const res = await fetch('/search?' + params.toString());
+  const results = await res.json();
+
+  const list = results.map(entry => {
+    // Create a clean copy of the entry with properly formatted _id
+    const cleanEntry = {
+      ...entry,
+      _id: entry._id.$oid ? entry._id.$oid : String(entry._id)
+    };
+    
+    return `
+    <div class="result-card animate__animated animate__fadeIn">
+      <div class="result-header">
+        <h4><a href="/history/${entry.mobile_no}" target="_blank">${entry.subscriber_name}</a></h4>
+        <span class="status-badge ${entry.status.toLowerCase()}">
+          ${entry.status}
+          ${entry.status === 'Unpaid' && entry.days_overdue ? 
+            `<span class="overdue-badge">${entry.days_overdue}d overdue</span>` : ''}
+        </span>
+      </div>
+      <div class="result-details">
+        <p><i class="fas fa-satellite-dish"></i> STB: ${entry.stb_no || 'N/A'}</p>
+        <p><i class="fas fa-hashtag"></i> VC: ${entry.vc_no || 'N/A'}</p>
+        <p><i class="fas fa-mobile-alt"></i> ${entry.mobile_no || 'N/A'}</p>
+        <p><i class="fas fa-rupee-sign"></i> ₹${entry.amount_paid}</p>
+        <p><i class="fas fa-calendar-day"></i> ${new Date(entry.recharge_date).toLocaleDateString('en-IN')}</p>
+        <p><i class="fas fa-rupee-sign"></i> Last Recharge: ₹${entry.last_recharge_amount || 0}</p>
+        <p><i class="fas fa-exclamation-circle"></i> Due Amount: ₹${entry.due_amount || 0}</p>
+        <p><i class="fas fa-comment-alt"></i> Remarks: ₹${entry.remark || 0}</p>
+
+        ${entry.status === 'Unpaid' ? 
+          `<p><i class="fas fa-clock"></i> Due: ${entry.days_overdue || 0} days ago</p>` : ''}
+      </div>
+      <div class="result-actions">
+        <button class="btn-edit" onclick='editEntry(${JSON.stringify(cleanEntry)})'>
+          <i class="fas fa-edit"></i> Edit
+        </button>
+        <button class="btn-delete" onclick="deleteEntry('${cleanEntry._id}')">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+      </div>
+    </div>
+  `}).join('');
+
+  document.getElementById('searchResults').innerHTML = list || '<div class="no-results">No results found</div>';
+}
+
+  function editEntry(entry) {
+    document.getElementById('editId').value = entry._id;
+    for (const key in entry) {
+      const field = form.querySelector(`[name="${key}"]`);
+      if (field) {
+        if (field.id === 'recharge_date' && entry[key]) {
+          const date = new Date(entry[key]);
+          const formattedDate = `${date.getFullYear()}-${pad(date.getMonth()+1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+          field.value = formattedDate;
+        } else if (field.id === 'paid_date' && entry[key]) {
+          const date = new Date(entry[key]);
+          field.value = date.toISOString().split('T')[0];
+        } else {
+          field.value = entry[key];
+        }
+      }
+    }
+    document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+    form.classList.add('highlight-edit');
+    setTimeout(() => form.classList.remove('highlight-edit'), 1500);
+  }
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+
+  const res = await fetch('/submit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(data)
+  });
+
+  const result = await res.json();
+
+  const responseElement = document.getElementById('responseMessage');
+  responseElement.innerText = result.message;
+  responseElement.className = 'response-message ' + (result.status === 'success' ? 'success' : 'error');
+  responseElement.classList.add('animate__animated', 'animate__fadeIn');
+
+  setTimeout(() => {
+    responseElement.classList.remove('animate__fadeIn');
+  }, 1000);
+
+  if (result.status === 'success') {
+    form.reset();
+    document.getElementById('editId').value = '';
+    performSearch();
+    loadSummary();
+  }
+});
+
+    async function deleteEntry(id) {
+      if (!confirm("Are you sure you want to delete this entry?")) return;
+
+      const res = await fetch('/delete/' + id, {
+        method: 'DELETE'
+      });
+
+      const result = await res.json();
+      
+      // Show notification
+      const notification = document.createElement('div');
+      notification.className = 'notification animate__animated animate__fadeInDown';
+      notification.innerHTML = `
+        <i class="fas ${result.status === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+        ${result.message || result.status}
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.remove('animate__fadeInDown');
+        notification.classList.add('animate__fadeOutUp');
+        setTimeout(() => notification.remove(), 1000);
+      }, 3000);
+
+      searchInput.dispatchEvent(new Event('input'));
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration | Admin Portal</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    :root {
+      --primary-color: #0984e3;
+      --secondary-color: #00b894;
+      --danger-color: #d63031;
+      --warning-color: #fdcb6e;
+      --dark-color: #2d3436;
+      --light-color: #f5f7fa;
+      --white-color: #ffffff;
+      --gray-color: #dfe6e9;
+      --text-color: #636e72;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      --transition: all 0.3s ease;
+    }
+    
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 20px;
+      font-family: 'Poppins', sans-serif;
+      background: var(--light-color);
+      color: var(--text-color);
+      overflow: hidden;
+    }
+    
+    .particles-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(135deg, var(--light-color) 0%, #c3cfe2 100%);
+    }
+    
+    .register-container {
+      width: 100%;
+      max-width: 500px;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation-duration: 0.5s;
+    }
+    
+    .register-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    }
+    
+    .register-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .register-header h2 {
+      font-size: 28px;
+      color: var(--dark-color);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    .register-header p {
+      color: var(--text-color);
+      font-size: 15px;
+    }
+    
+    .register-form .form-group {
+      margin-bottom: 20px;
+      position: relative;
+      animation-duration: 0.5s;
+    }
+    
+    .register-form label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--dark-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .register-form label i {
+      color: var(--primary-color);
+      font-size: 14px;
+      transition: var(--transition);
+    }
+    
+    .register-form input,
+    .register-form select {
+      width: 100%;
+      padding: 12px 15px 12px 40px;
+      border: 1px solid var(--gray-color);
+      border-radius: 8px;
+      font-size: 15px;
+      transition: var(--transition);
+      background-color: rgba(245, 247, 250, 0.5);
+    }
+    
+    .register-form input:focus,
+    .register-form select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+      outline: none;
+      background-color: var(--white-color);
+    }
+    
+    .register-form i.input-icon {
+      position: absolute;
+      left: 15px;
+      top: 38px;
+      color: var(--text-color);
+      font-size: 16px;
+      transition: var(--transition);
+    }
+    
+    .register-form input:focus ~ i.input-icon,
+    .register-form select:focus ~ i.input-icon {
+      color: var(--primary-color);
+    }
+    
+    .btn-register {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      color: var(--white-color);
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(9, 132, 227, 0.3);
+    }
+    
+    .btn-register:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(9, 132, 227, 0.4);
+    }
+    
+    .btn-register:active {
+      transform: translateY(0);
+    }
+    
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 25px;
+      color: var(--text-color);
+      text-decoration: none;
+      transition: var(--transition);
+      font-size: 14px;
+    }
+    
+    .back-link:hover {
+      color: var(--primary-color);
+    }
+    
+    .success-message {
+      background-color: #e3f9e5;
+      color: var(--secondary-color);
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      border-left: 4px solid var(--secondary-color);
+      animation: fadeIn 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .password-strength {
+      margin-top: 5px;
+      height: 4px;
+      background: var(--gray-color);
+      border-radius: 2px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .password-strength::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: var(--secondary-color);
+      transition: var(--transition);
+    }
+    
+    .weak::after {
+      background: var(--danger-color);
+      width: 30%;
+    }
+    
+    .medium::after {
+      background: var(--warning-color);
+      width: 60%;
+    }
+    
+    .strong::after {
+      background: var(--secondary-color);
+      width: 100%;
+    }
+    
+    /* Animated background effect */
+    .register-container::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, 
+        rgba(9, 132, 227, 0.1) 0%, 
+        rgba(0, 184, 148, 0.1) 50%, 
+        rgba(9, 132, 227, 0.1) 100%);
+      transform: rotate(45deg);
+      z-index: -1;
+      animation: gradientBG 15s ease infinite;
+    }
+    
+    @keyframes gradientBG {
+      0% { transform: rotate(45deg) translateX(-25%); }
+      50% { transform: rotate(45deg) translateX(25%); }
+      100% { transform: rotate(45deg) translateX(-25%); }
+    }
+    
+    /* Responsive design */
+    @media (max-width: 576px) {
+      .register-container {
+        padding: 30px 20px;
+      }
+      
+      .register-header h2 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="particles-container">
+    <div id="particles-js"></div>
+  </div>
+  
+  <div class="register-container animate__animated animate__fadeIn">
+    <div class="register-header">
+      <h2><i class="fas fa-user-plus"></i> Create New Account</h2>
+      <p>Register a new user for the recharge management system</p>
+    </div>
+    
+    {% if error %}
+    <div class="error-message animate__animated animate__fadeIn">
+      <i class="fas fa-exclamation-circle"></i> {{ error }}
+    </div>
+    {% endif %}
+    
+    <form method="POST" class="register-form">
+      <div class="form-group animate__animated animate__fadeInUp">
+        <label for="username"><i class="fas fa-user"></i> Username</label>
+        <i class="fas fa-user input-icon"></i>
+        <input type="text" id="username" name="username" required placeholder="Enter unique username">
+      </div>
+      
+      <div class="form-group animate__animated animate__fadeInUp" style="animation-delay: 0.1s">
+        <label for="password"><i class="fas fa-lock"></i> Password</label>
+        <i class="fas fa-lock input-icon"></i>
+        <input type="password" id="password" name="password" required placeholder="Create secure password">
+        <div class="password-strength"></div>
+      </div>
+      
+      <div class="form-group animate__animated animate__fadeInUp" style="animation-delay: 0.2s">
+        <label for="role"><i class="fas fa-user-tag"></i> Role</label>
+        <i class="fas fa-user-tag input-icon"></i>
+        <select id="role" name="role" required>
+          <option value="">Select User Role</option>
+          <option value="admin">Administrator</option>
+          <option value="operator">Operator</option>
+        </select>
+      </div>
+      
+      <button type="submit" class="btn-register animate__animated animate__fadeInUp" style="animation-delay: 0.3s">
+        <i class="fas fa-user-plus"></i> Register User
+      </button>
+    </form>
+    
+    {% if msg %}
+      <div class="success-message animate__animated animate__fadeIn">
+        <i class="fas fa-check-circle"></i> {{ msg }}
+      </div>
+    {% endif %}
+    
+    <a href="/login" class="back-link animate__animated animate__fadeInUp" style="animation-delay: 0.4s">
+      <i class="fas fa-arrow-left"></i> Back to Login
+    </a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script>
+    // Initialize particles.js with interactive lines
+    document.addEventListener('DOMContentLoaded', function() {
+      particlesJS('particles-js', {
+        "particles": {
+          "number": {
+            "value": 60,
+            "density": {
+              "enable": true,
+              "value_area": 800
+            }
+          },
+          "color": {
+            "value": "#0984e3"
+          },
+          "shape": {
+            "type": "circle",
+            "stroke": {
+              "width": 0,
+              "color": "#000000"
+            },
+            "polygon": {
+              "nb_sides": 5
+            }
+          },
+          "opacity": {
+            "value": 0.3,
+            "random": false,
+            "anim": {
+              "enable": false,
+              "speed": 1,
+              "opacity_min": 0.1,
+              "sync": false
+            }
+          },
+          "size": {
+            "value": 3,
+            "random": true,
+            "anim": {
+              "enable": false,
+              "speed": 40,
+              "size_min": 0.1,
+              "sync": false
+            }
+          },
+          "line_linked": {
+            "enable": true,
+            "distance": 150,
+            "color": "#0984e3",
+            "opacity": 0.2,
+            "width": 1
+          },
+          "move": {
+            "enable": true,
+            "speed": 2,
+            "direction": "none",
+            "random": false,
+            "straight": false,
+            "out_mode": "out",
+            "bounce": false,
+            "attract": {
+              "enable": false,
+              "rotateX": 600,
+              "rotateY": 1200
+            }
+          }
+        },
+        "interactivity": {
+          "detect_on": "canvas",
+          "events": {
+            "onhover": {
+              "enable": true,
+              "mode": "grab"
+            },
+            "onclick": {
+              "enable": true,
+              "mode": "push"
+            },
+            "resize": true
+          },
+          "modes": {
+            "grab": {
+              "distance": 140,
+              "line_linked": {
+                "opacity": 1
+              }
+            },
+            "bubble": {
+              "distance": 400,
+              "size": 40,
+              "duration": 2,
+              "opacity": 8,
+              "speed": 3
+            },
+            "repulse": {
+              "distance": 200,
+              "duration": 0.4
+            },
+            "push": {
+              "particles_nb": 4
+            },
+            "remove": {
+              "particles_nb": 2
+            }
+          }
+        },
+        "retina_detect": true
+      });
+      
+      // Add animation to form elements
+      const formGroups = document.querySelectorAll('.form-group');
+      formGroups.forEach((group, index) => {
+        group.style.animationDelay = `${index * 0.1}s`;
+      });
+      
+      // Password strength indicator
+      const passwordInput = document.getElementById('password');
+      const strengthBar = document.querySelector('.password-strength');
+      
+      passwordInput.addEventListener('input', function() {
+        const strength = calculatePasswordStrength(this.value);
+        updateStrengthBar(strength);
+      });
+      
+      function calculatePasswordStrength(password) {
+        let strength = 0;
+        
+        // Length check
+        if (password.length === 0) return 0;
+        if (password.length < 6) return 1;
+        if (password.length >= 8) strength += 1;
+        if (password.length >= 12) strength += 1;
+        
+        // Character variety
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+        
+        return strength;
+      }
+      
+      function updateStrengthBar(strength) {
+        strengthBar.className = 'password-strength';
+        
+        if (strength === 0) {
+          strengthBar.style.width = '0%';
+        } else if (strength <= 2) {
+          strengthBar.classList.add('weak');
+        } else if (strength <= 4) {
+          strengthBar.classList.add('medium');
+        } else {
+          strengthBar.classList.add('strong');
+        }
+      }
+      
+      // Focus effects for inputs
+      $('input, select').focus(function() {
+        $(this).prevAll('i.input-icon').css('color', '#0984e3');
+      }).blur(function() {
+        $(this).prevAll('i.input-icon').css('color', '#636e72');
+      });
+    });
+  </script>
+</body>
+</html>
