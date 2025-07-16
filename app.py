@@ -484,4 +484,4 @@ if __name__ == '__main__':
             "role": "admin",
             "is_dummy": True
         })
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port = 5000, debug=True)
