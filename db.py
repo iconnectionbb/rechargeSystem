@@ -7,7 +7,7 @@ import certifi
 load_dotenv()
 
 # Recommended: Store this in .env
-mongo_uri = os.getenv("MONGO_URI")
+mongo_uri = "mongodb+srv://iconnectionbb:connectionbb@cluster0.bxvnl5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 
 # Setup TLS with certifi
 ca = certifi.where()
