@@ -1,7 +1,16 @@
+import os
 from pymongo import MongoClient
+from dotenv import load_dotenv
 
-client = MongoClient("mongodb+srv://iconnectionbb:9l7i8Zsb5vZqDQJ3@cluster0.bxvnl5a.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
+# Load environment variables from .env
+load_dotenv()
+
+# Get the URI from environment
+mongo_uri = os.getenv("MONGO_URI")
+
+# Connect to MongoDB
+client = MongoClient(mongo_uri)
 db = client['cable_recharge']
 
 recharges = db['recharges']
-users = db['users']  # NEW LINE
+users = db['users']
